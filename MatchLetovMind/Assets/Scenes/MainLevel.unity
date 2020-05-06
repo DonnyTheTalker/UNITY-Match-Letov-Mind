@@ -369,6 +369,7 @@ GameObject:
   m_Component:
   - component: {fileID: 848218552}
   - component: {fileID: 848218553}
+  - component: {fileID: 848218554}
   m_Layer: 0
   m_Name: GameManager
   m_TagString: Untagged
@@ -385,7 +386,7 @@ Transform:
   m_GameObject: {fileID: 848218551}
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
   m_LocalPosition: {x: 0, y: 0, z: 0}
-  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_LocalScale: {x: 6.1375, y: 3.0875, z: 1}
   m_Children: []
   m_Father: {fileID: 0}
   m_RootOrder: 3
@@ -404,12 +405,12 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   BoardLayaout:
     Rows:
-    - Row: 01010101010101010001
-    - Row: 01000000000000000100
-    - Row: 01000101000101000100
-    - Row: 01000101000000000000
-    - Row: 01000101000101000000
-    - Row: 01000101000000000100
+    - Row: 00000000000000000000
+    - Row: 00000000000000000000
+    - Row: 00000000000000000000
+    - Row: 00000000000000000000
+    - Row: 00000000000000000000
+    - Row: 00000000000000000000
   _height: 6
   _width: 10
   Pieces:
@@ -422,6 +423,18 @@ MonoBehaviour:
   NodePiecePrefab: {fileID: 3648393947491323157, guid: 01ba796dfa291cb4985bcc452e941deb,
     type: 3}
   GameBoard: {fileID: 860008738}
+--- !u!114 &848218554
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 848218551}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: b4883030a67b4bb4b97e1e9a50c4715d, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
 --- !u!1 &860008737
 GameObject:
   m_ObjectHideFlags: 0

@@ -1,7 +1,7 @@
-﻿using System;
-using UnityEngine;
+﻿using System; 
+using UnityEngine; 
 
-public class GameManager : MonoBehaviour
+public class GameManager : MonoBehaviour 
 {
     public ArrayLayout BoardLayaout;
     [SerializeField] private int _height = 6;
@@ -46,37 +46,37 @@ public class GameManager : MonoBehaviour
     {
         for (int x = 0; x < _width; x++) {
             for (int y = 0; y < _height; y++)
-                CheckLine(new Point(x, y));
+                ChangeSameLine(new Point(x, y));
         }
     }
 
-    void CheckLine(Point middle)
+    void ChangeSameLine(Point center)
     {
-        int left = GetValueAtPoint(Point.Add(middle, Point.Left));
-        int mid = GetValueAtPoint(middle);
-        int right = GetValueAtPoint(Point.Add(middle, Point.Right));
-        int up = GetValueAtPoint(Point.Add(middle, Point.Up));
-        int down = GetValueAtPoint(Point.Add(middle, Point.Down));
+        int left = GetValueAtPoint(Point.Add(center, Point.Left));
+        int mid = GetValueAtPoint(center);
+        int right = GetValueAtPoint(Point.Add(center, Point.Right));
+        int up = GetValueAtPoint(Point.Add(center, Point.Up));
+        int down = GetValueAtPoint(Point.Add(center, Point.Down));
 
         bool hasMultLine = true;
 
         while (hasMultLine) {
             hasMultLine = false;
 
-            if (middle.X > 0 && middle.X < _width - 1)
+            if (center.X > 0 && center.X < _width - 1)
                 if (left > 0 && right > 0)
                     while (left == right && right == mid) {
                         hasMultLine = true;
-                        SetValueAtPoint(middle, FillPiece()); 
-                        mid = GetValueAtPoint(middle); 
+                        SetValueAtPoint(center, FillPiece()); 
+                        mid = GetValueAtPoint(center); 
                     }
             
-            if (middle.Y > 0 && middle.Y < _height - 1)
+            if (center.Y > 0 && center.Y < _height - 1)
                 if (up > 0 && down > 0)
                     while (up == down && down == mid) {
                         hasMultLine = true;
-                        SetValueAtPoint(middle, FillPiece());
-                        mid = GetValueAtPoint(middle); 
+                        SetValueAtPoint(center, FillPiece());
+                        mid = GetValueAtPoint(center); 
                     }
             
         }
@@ -96,6 +96,12 @@ public class GameManager : MonoBehaviour
                 nodePiece.Initialize(val, new Point(x, y), Pieces[val - 1]); 
             }
         }
+    }
+
+    public static Vector2 GetPositionFromPoint(Point p)
+    {
+        return new Vector2(XOffset + p.X * NodeSize,
+            YOffset - p.Y * NodeSize);
     }
 
     int GetValueAtPoint(Point p)
@@ -135,6 +141,5 @@ public class GameManager : MonoBehaviour
             seed += acceptableChars[tempRand.Next(0, acceptableChars.Length)];
 
         return seed; 
-    }
-
+    } 
 }

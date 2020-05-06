@@ -58,10 +58,12 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: dcc8d692166aa49498274afae37604b1, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  MovingSpeed: 8
   Value: 0
   Index:
     X: 0
     Y: 0
+  IsGrabbed: 0
   Pos: {x: 0, y: 0}
   Rect: {fileID: 0}
 --- !u!114 &7388273867286578223
