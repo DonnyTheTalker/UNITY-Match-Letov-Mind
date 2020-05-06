@@ -5,16 +5,16 @@ using UnityEngine;
 public class Board : MonoBehaviour
 {
     [Header("Board Settings")]
-    public int Width;
-    public int Height;
+    public int Width = 16;
+    public int Height = 8;
 
     [Header("Tile Setup")] 
-    private GameObject[,] _tiles;
+    public GameObject[,] Tiles;
     public GameObject[] TilesPrefabs;
 
     private void Start()
     {
-        _tiles = new GameObject[Width, Height];
+        Tiles = new GameObject[Width, Height];
         Setup();
     }
 
@@ -29,7 +29,7 @@ public class Board : MonoBehaviour
 
                 tile.transform.parent = this.transform;
                 tile.name = "( " + x + ", " + y + ")";
-                _tiles[x, y] = tile;
+                Tiles[x, y] = tile;
 
             }
         }
