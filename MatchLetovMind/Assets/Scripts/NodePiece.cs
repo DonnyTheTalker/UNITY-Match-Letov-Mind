@@ -1,6 +1,6 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
-using UnityEngine; 
+using UnityEngine;
 using UnityEngine.UI;
 using UnityEngine.EventSystems;
 
@@ -46,6 +46,23 @@ public class NodePiece : MonoBehaviour, IPointerDownHandler, IPointerUpHandler
         Rect.anchoredPosition = Pos;
     }
 
+    public void ResetPiece()
+    {
+        StartCoroutine(MovePositionBack());
+    }
+
+    public IEnumerator MovePositionBack()
+    {
+        Vector2 dest = Pos;
+         
+        while (Mathf.Abs(Vector2.Distance(dest, Rect.anchoredPosition)) > 0.003) {
+            MovePositionTo(dest);
+            yield return null;
+        }
+
+        Rect.anchoredPosition = dest; 
+    }
+
     public void MovePositionTo(Vector2 pos)
     {
         Rect.anchoredPosition = Vector2.Lerp(Rect.anchoredPosition, pos, Time.deltaTime * MovingSpeed);
@@ -53,13 +70,13 @@ public class NodePiece : MonoBehaviour, IPointerDownHandler, IPointerUpHandler
 
     public void MovePosition(Vector2 pos)
     {
-        Rect.anchoredPosition += pos * Time.deltaTime * MovingSpeed;
+        Rect.anchoredPosition = pos;
     }
-   
+
     public void UpdateName()
     {
         transform.name = "Node [" + Index.X + ", " + Index.Y + "]";
-    } 
+    }
 
     public bool UpdatePiece()
     {

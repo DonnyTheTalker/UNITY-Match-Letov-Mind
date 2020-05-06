@@ -37,7 +37,7 @@ public class GameManager : MonoBehaviour
     
         for (int y = 0; y < _height; y++) {
             for (int x = 0; x < _width; x++) {
-                _board[x, y] = new Node(BoardLayaout.Rows[y].Row[x] ? -1 : FillPiece(), new Point(x, y));
+                _board[x, y] = new Node(BoardLayaout.Rows[y].Row[x] ? -1 : FillPiece(), new Point(x, y), null);
             }
         }
     }
@@ -93,7 +93,8 @@ public class GameManager : MonoBehaviour
 
                 GameObject node = Instantiate(NodePiecePrefab, GameBoard);
                 NodePiece nodePiece = node.GetComponent<NodePiece>();  
-                nodePiece.Initialize(val, new Point(x, y), Pieces[val - 1]); 
+                nodePiece.Initialize(val, new Point(x, y), Pieces[val - 1]);
+                _board[x, y].piece = nodePiece;
             }
         }
     }
@@ -116,6 +117,57 @@ public class GameManager : MonoBehaviour
         if (x < 0 || x >= _width || y < 0 || y >= _height)
             return -1;
         return _board[x, y].Value;
+    }
+
+    public void SwapPieces(Point first, Point second)
+    {
+        Node nodeFirst = GetNodeAtPoint(first);
+        Node nodeSecond = GetNodeAtPoint(second);
+        
+        if (nodeFirst.Value <= 0) return;
+        if (nodeSecond.Value <= 0) {
+            nodeFirst.piece.ResetPiece();
+            return;
+        }
+
+        Debug.Log(first.X + " " + first.Y + "   " + second.X + " " + second.Y);
+
+        NodePiece pieceFirst = nodeFirst.piece;
+        NodePiece pieceSecond = nodeSecond.piece;
+
+        var temp = new Node(nodeFirst);
+        nodeFirst = new Node(nodeSecond);
+        nodeSecond = new Node(temp);
+
+        nodeFirst.piece = pieceSecond;
+        nodeSecond.piece = pieceFirst;
+
+        _board[first.X, first.Y] = nodeFirst;
+        _board[second.X, second.Y] = nodeSecond;
+
+        ResetNodeAtPoint(first);
+        ResetNodeAtPoint(second);
+
+        var dir = new Vector2(nodeFirst.piece.Pos.x, nodeFirst.piece.Pos.y);
+        nodeFirst.piece.Pos = new Vector2(nodeSecond.piece.Pos.x, nodeSecond.piece.Pos.y);
+        nodeSecond.piece.Pos = dir;
+
+        nodeFirst.piece.ResetPiece();
+        nodeSecond.piece.ResetPiece();
+        nodeFirst.piece.ResetPiece();
+        nodeSecond.piece.ResetPiece();
+
+    }
+
+    Node GetNodeAtPoint(Point p)
+    {
+        return _board[p.X, p.Y];
+    }
+
+    public void ResetNodeAtPoint(Point p)
+    {
+        _board[p.X, p.Y].piece.Index = p; 
+        _board[p.X, p.Y].Index = p;
     }
 
     void SetValueAtPoint(Point p, int value)

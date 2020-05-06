@@ -11,6 +11,8 @@ public class PieceMovement : MonoBehaviour
     private Point _newIndex;
     private Vector2 _mouseStart;
 
+    private Point add;
+
     private void Awake()
     {
         Instance = this;
@@ -29,14 +31,14 @@ public class PieceMovement : MonoBehaviour
             Vector2 absDir = new Vector2(Mathf.Abs(dir.x), Mathf.Abs(dir.y));
 
             _newIndex = Point.Clone(_movingPiece.Index);
-            Point add = Point.Zero;
+            add = Point.Zero;
 
-            if (dir.magnitude > GameManager.XOffset / 2) {
+            if (dir.magnitude > GameManager.XOffset) {
 
                 if (absDir.x > absDir.y)
                     add = new Point((dirNormalized.x > 0) ? 1 : -1, 0);
                 else
-                    add = new Point(0, (dirNormalized.y) > 0 ? 1 : -1);
+                    add = new Point(0, (dirNormalized.y) > 0 ? -1 : 1);
 
             }
 
@@ -44,7 +46,7 @@ public class PieceMovement : MonoBehaviour
             Vector2 newPos = GameManager.GetPositionFromPoint(_movingPiece.Index);
 
             if (!Point.Equals(_newIndex, _movingPiece.Index)) {
-                newPos += new Vector2(add.X, add.Y) * 8;
+                newPos += new Vector2(add.X, -add.Y) * 10;
             }
 
             _movingPiece.MovePositionTo(newPos);
@@ -63,6 +65,14 @@ public class PieceMovement : MonoBehaviour
     {
         if (_movingPiece == null) return;
 
+        if (!Point.Equals(_newIndex, _movingPiece.Index)) {
+            _movingPiece.MovePosition(GameManager.GetPositionFromPoint(_movingPiece.Index) + new Vector2(add.X, -add.Y) * 10);
+            _gameManager.SwapPieces(_movingPiece.Index, _newIndex); 
+            _movingPiece = null;
+            return;
+        }
+
+        _movingPiece.ResetPiece();
         _movingPiece = null;
     }
     
