@@ -31,9 +31,7 @@ public class Tile : MonoBehaviour
 
     private void Start()
     {
-        _board = FindObjectOfType<Board>();
-        Row = (int)transform.position.y;
-        Column = (int)transform.position.x;
+        _board = FindObjectOfType<Board>(); 
     }
 
     public void SetPos(int row, int col)
@@ -118,7 +116,6 @@ public class Tile : MonoBehaviour
                     SetPos(tempY, tempX);
                     _board.Tiles[finalX, finalY].GetComponent<Tile>().SetPos(finalY, finalX);
                 } else {
-                    _board.DestroyAllMatches();
                     _board.RefillBoard();
                 }
             }

@@ -56,6 +56,7 @@ public class Board : MonoBehaviour
         int iTile = UnityEngine.Random.Range(0, TilesPrefabs.Length);
         GameObject tile = Instantiate(TilesPrefabs[iTile], tilePosition, Quaternion.identity) as GameObject;
 
+        tile.GetComponent<Tile>().SetPos(y, x);
         tile.transform.parent = this.transform;
         tile.name = "( " + x + ", " + y + ")";
         Tiles[x, y] = tile;
@@ -144,16 +145,16 @@ public class Board : MonoBehaviour
     }
 
     public void RefillBoard()
-    { 
-        FillEmptyTiles(); 
+    {  
         while (CanFindMatch()) {
             Debug.Log("FOUND");
             DestroyAllMatches();
-            FillEmptyTiles();  
+            LowerTiles();
+            FillEmptyTiles();
         }
     }
 
-    public void FillEmptyTiles()
+    public void LowerTiles()
     { 
         for (int x = 0; x < Width; x++) {
             for (int y = 0; y < Height; y++) {
@@ -177,8 +178,29 @@ public class Board : MonoBehaviour
 
                 }
             }
-        }
+        } 
+    }
 
+    public void FillEmptyTiles()
+    {
+        for (int x = 0; x < Width; x++) 
+            for (int y = 0; y < Height; y++) 
+                if (Indexes[x, y] == -1) {
+
+                    int tempRow = Height;
+
+                    while (y < Height) { 
+                        SpawnTile(x, y);
+                        var tile = Tiles[x, y].GetComponent<Tile>();
+                        tile.transform.position = new Vector3(x, tempRow, 0f);
+                        tile.SetPos(y, x);
+
+                        y++;
+                        tempRow++;
+                    }
+
+                    break;
+                }
     }
 
 }
