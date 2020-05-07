@@ -7,22 +7,26 @@ public class Tile : MonoBehaviour
     private Vector2 _firstTouchPos;
     private Vector2 _finalTouchPos;
     private Board _board;
-
+     
     public int Row;
     public int Column;
     public float MovingSpeed = 8f;
 
     private void Update()
     {
-        Vector2 dir = new Vector2(Column, Row) - new Vector2(transform.position.x, transform.position.y);
+        MoveTile(this);
+    }
+
+    public void MoveTile(Tile tile)
+    {
+        Vector2 dir = new Vector2(tile.Column, tile.Row) - new Vector2(tile.transform.position.x, tile.transform.position.y);
 
         if (Mathf.Abs(dir.magnitude) > 0.003f) {
-            var tempPos = new Vector2(Column, Row);
-            transform.position = Vector2.Lerp(transform.position, tempPos, MovingSpeed * Time.deltaTime);
+            var tempPos = new Vector2(tile.Column, tile.Row);
+            tile.transform.position = Vector2.Lerp(tile.transform.position, tempPos, tile.MovingSpeed * Time.deltaTime);
         } else {
-            transform.position = new Vector3(Column, Row, 0f);
+            tile.transform.position = new Vector3(tile.Column, tile.Row, 0f);
         }
-
     }
 
     private void Start()
@@ -54,7 +58,7 @@ public class Tile : MonoBehaviour
             return;
 
         GetMovedPos(ref finalX, ref finalY);
-        SwapTiles(finalX, finalY);
+        StartCoroutine(SwapTiles(finalX, finalY));
 
     }
 
@@ -80,16 +84,39 @@ public class Tile : MonoBehaviour
         }
     }
 
-    private void SwapTiles(int finalX, int finalY)
+    private IEnumerator SwapTiles(int finalX, int finalY)
     {
-        if (finalY < 0 || finalX < 0 || finalX >= _board.Width || finalY >= _board.Height)
-            return;
+        int tempX = Column, tempY = Row;
 
-        _board.Tiles[Column, Row] = _board.Tiles[finalX, finalY];
-        _board.Tiles[finalX, finalY] = this.gameObject;
+        if (!(finalY < 0 || finalX < 0 || finalX >= _board.Width || finalY >= _board.Height)) {
 
-        _board.Tiles[Column, Row].GetComponent<Tile>().SetPos(Row, Column);
-        SetPos(finalY, finalX);
+            _board.Tiles[Column, Row] = _board.Tiles[finalX, finalY];
+            _board.Tiles[finalX, finalY] = this.gameObject;
+
+            int temp = _board.Indexes[Column, Row];
+            _board.Indexes[Column, Row] = _board.Indexes[finalX, finalY];
+            _board.Indexes[finalX, finalY] = temp;
+
+            _board.Tiles[Column, Row].GetComponent<Tile>().SetPos(Row, Column);
+            SetPos(finalY, finalX);
+
+            yield return new WaitForSeconds(0.3f);
+
+            if (!_board.CanFindMatch()) {
+                _board.Tiles[finalX, finalY] = _board.Tiles[tempX, tempY];
+                _board.Tiles[tempX, tempY] = this.gameObject;
+
+                temp = _board.Indexes[tempX, tempY];
+                _board.Indexes[tempX, tempY] = _board.Indexes[finalX, finalY];
+                _board.Indexes[finalX, finalY] = temp;
+
+                SetPos(tempY, tempX);
+                _board.Tiles[finalX, finalY].GetComponent<Tile>().SetPos(finalY, finalX);  
+            }
+        
+        } else {
+            yield return null;
+        }
 
     }
 
