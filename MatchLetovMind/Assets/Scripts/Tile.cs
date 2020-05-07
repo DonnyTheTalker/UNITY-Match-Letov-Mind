@@ -54,10 +54,10 @@ public class Tile : MonoBehaviour
         int finalX = (int)Mathf.Round(_finalTouchPos.x);
         int finalY = (int)Mathf.Round(_finalTouchPos.y);
 
-        if (Column == finalX && Row == finalY || _board.Indexes[finalX, finalY] == -1)
+        if (Column == finalX && Row == finalY) 
             return;
 
-        GetMovedPos(ref finalX, ref finalY);
+        GetMovedPos(ref finalX, ref finalY);  
         StartCoroutine(SwapTiles(finalX, finalY));
 
     }
@@ -90,32 +90,37 @@ public class Tile : MonoBehaviour
 
         if (!(finalY < 0 || finalX < 0 || finalX >= _board.Width || finalY >= _board.Height)) {
 
-            _board.Tiles[Column, Row] = _board.Tiles[finalX, finalY];
-            _board.Tiles[finalX, finalY] = this.gameObject;
+            if (_board.Indexes[finalX, finalY] == -1) {
+                yield return null;
+            } else {
 
-            int temp = _board.Indexes[Column, Row];
-            _board.Indexes[Column, Row] = _board.Indexes[finalX, finalY];
-            _board.Indexes[finalX, finalY] = temp;
+                _board.Tiles[Column, Row] = _board.Tiles[finalX, finalY];
+                _board.Tiles[finalX, finalY] = this.gameObject;
 
-            _board.Tiles[Column, Row].GetComponent<Tile>().SetPos(Row, Column);
-            SetPos(finalY, finalX);
-
-            yield return new WaitForSeconds(0.3f);
-
-            if (!_board.CanFindMatch()) {
-                _board.Tiles[finalX, finalY] = _board.Tiles[tempX, tempY];
-                _board.Tiles[tempX, tempY] = this.gameObject;
-
-                temp = _board.Indexes[tempX, tempY];
-                _board.Indexes[tempX, tempY] = _board.Indexes[finalX, finalY];
+                int temp = _board.Indexes[Column, Row];
+                _board.Indexes[Column, Row] = _board.Indexes[finalX, finalY];
                 _board.Indexes[finalX, finalY] = temp;
 
-                SetPos(tempY, tempX);
-                _board.Tiles[finalX, finalY].GetComponent<Tile>().SetPos(finalY, finalX);  
-            } else {
-                _board.DestroyAllMatches();
+                _board.Tiles[Column, Row].GetComponent<Tile>().SetPos(Row, Column);
+                SetPos(finalY, finalX);
+
+                yield return new WaitForSeconds(0.3f);
+
+                if (!_board.CanFindMatch()) {
+                    _board.Tiles[finalX, finalY] = _board.Tiles[tempX, tempY];
+                    _board.Tiles[tempX, tempY] = this.gameObject;
+
+                    temp = _board.Indexes[tempX, tempY];
+                    _board.Indexes[tempX, tempY] = _board.Indexes[finalX, finalY];
+                    _board.Indexes[finalX, finalY] = temp;
+
+                    SetPos(tempY, tempX);
+                    _board.Tiles[finalX, finalY].GetComponent<Tile>().SetPos(finalY, finalX);
+                } else {
+                    _board.DestroyAllMatches();
+                    StartCoroutine(_board.FillEmptyTiles());
+                }
             }
-        
         } else {
             yield return null;
         }

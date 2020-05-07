@@ -128,4 +128,37 @@ public class Board : MonoBehaviour
         return matches;
     }
 
+    public IEnumerator FillEmptyTiles()
+    {
+        for (int x = 0; x < Width; x++) {
+            for (int y = 0; y < Height; y++) {
+                if (Indexes[x, y] >= 0) {
+
+                    // counting empty spaces under non-empty tile
+                    int tempRow = y - 1;
+
+                    while (tempRow >= 0 && Indexes[x, tempRow] == -1)
+                        tempRow--;
+                    tempRow++;
+
+                    if (tempRow != y) {
+                        Indexes[x, tempRow] = Indexes[x, y];
+                        Indexes[x, y] = -1;
+                        Tiles[x, tempRow] = Tiles[x, y];
+                        Tiles[x, y] = null;
+                        Tiles[x, tempRow].GetComponent<Tile>().SetPos(tempRow, x);
+                    }
+
+                }
+            }
+        }
+
+        yield return new WaitForSeconds(0.4f);
+
+        if (CanFindMatch()) {
+            DestroyAllMatches();
+            StartCoroutine(FillEmptyTiles());
+        }
+    }
+
 }

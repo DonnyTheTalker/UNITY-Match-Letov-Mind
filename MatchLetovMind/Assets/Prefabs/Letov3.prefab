@@ -47,7 +47,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   Row: 0
   Column: 0
-  MovingSpeed: 8
+  MovingSpeed: 4
 --- !u!212 &3658441818326769662
 SpriteRenderer:
   m_ObjectHideFlags: 0
