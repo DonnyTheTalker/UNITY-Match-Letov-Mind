@@ -54,7 +54,7 @@ public class Tile : MonoBehaviour
         int finalX = (int)Mathf.Round(_finalTouchPos.x);
         int finalY = (int)Mathf.Round(_finalTouchPos.y);
 
-        if (Column == finalX && Row == finalY)
+        if (Column == finalX && Row == finalY || _board.Indexes[finalX, finalY] == -1)
             return;
 
         GetMovedPos(ref finalX, ref finalY);
@@ -112,6 +112,8 @@ public class Tile : MonoBehaviour
 
                 SetPos(tempY, tempX);
                 _board.Tiles[finalX, finalY].GetComponent<Tile>().SetPos(finalY, finalX);  
+            } else {
+                _board.DestroyAllMatches();
             }
         
         } else {
