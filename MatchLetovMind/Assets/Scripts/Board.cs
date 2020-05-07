@@ -12,7 +12,7 @@ public class Board : MonoBehaviour
     public int[,] Indexes;
     public GameObject[] TilesPrefabs;
 
-    private Color _deathColor = new Color(255f, 0f, 0f, 0f);
+    public Color DeathColor;
 
     private void Start()
     {
@@ -64,7 +64,8 @@ public class Board : MonoBehaviour
     }
 
     public bool CanFindMatch()
-    { 
+    {
+        Debug.Log("CanFindMatch");
         for (int x = 0; x < Width; x++)
             for (int y = 0; y < Height; y++)
                 if (IsMatch(x, y))
@@ -92,6 +93,7 @@ public class Board : MonoBehaviour
 
     public void DestroyAllMatches()
     {
+        Debug.Log("Destoy");
         var matches = GetAllMaches();
 
         for (int i = 0; i < matches.Count; i++) {
@@ -101,8 +103,8 @@ public class Board : MonoBehaviour
 
             if (Indexes[x, y] >= 0) {
                 Indexes[x, y] = -1;
-                DestroyTile(Tiles[x, y]);
-                Destroy(Tiles[x, y]);
+                StartCoroutine(DestroyTile(Tiles[x, y]));
+                Destroy(Tiles[x, y], 0.3f);
                 Tiles[x, y] = null;
             }
 
@@ -110,12 +112,27 @@ public class Board : MonoBehaviour
 
     }
 
-    private void DestroyTile(GameObject tile)
-    {
-
+    private IEnumerator DestroyTile(GameObject tile)
+    { 
         Debug.Log("Destroing");
-        var spriteRenderer = tile.GetComponent<SpriteRenderer>();
-        spriteRenderer.color = new Color(spriteRenderer.color.r, spriteRenderer.color.g, spriteRenderer.color.b, 40f);
+        var spriteRenderer = tile.GetComponent<SpriteRenderer>(); 
+
+        float redOffset = (spriteRenderer.color.r - DeathColor.r) / 10f;
+        float greenOffset = (spriteRenderer.color.g - DeathColor.g) / 10f;
+        float blueOffset = (spriteRenderer.color.b - DeathColor.b) / 10f;
+        float alphaOffset = (spriteRenderer.color.a - DeathColor.a) / 10f;
+
+        for (int i = 0; i < 10; i++) {
+
+            float red = spriteRenderer.color.r;
+            float green = spriteRenderer.color.g;
+            float blue = spriteRenderer.color.b;
+            float alpha = spriteRenderer.color.a;
+
+            spriteRenderer.color = new Color(red - redOffset, green - greenOffset,
+                blue - blueOffset, alpha - alphaOffset);
+            yield return null;
+        }
 
     }
 
@@ -144,18 +161,27 @@ public class Board : MonoBehaviour
         return matches;
     }
 
-    public void RefillBoard()
-    {  
-        while (CanFindMatch()) {
-            Debug.Log("FOUND");
-            DestroyAllMatches();
-            LowerTiles();
-            FillEmptyTiles();
-        }
+    public void StartRefill()
+    {
+        StartCoroutine(RefillBoard());
     }
 
-    public void LowerTiles()
-    { 
+    public IEnumerator RefillBoard()
+    {  
+        while (CanFindMatch()) {
+            Debug.Log("Coroutine");
+            DestroyAllMatches();
+            yield return new WaitForSeconds(0.3f);
+            StartCoroutine(LowerTiles());
+            yield return new WaitForSeconds(0.3f);
+            FillEmptyTiles();
+            yield return new WaitForSeconds(0.3f);
+        } 
+    }
+
+    public IEnumerator LowerTiles()
+    {
+        Debug.Log("Lower");
         for (int x = 0; x < Width; x++) {
             for (int y = 0; y < Height; y++) {
                 if (Indexes[x, y] >= 0) {
@@ -178,11 +204,13 @@ public class Board : MonoBehaviour
 
                 }
             }
-        } 
+        }
+        yield return new WaitForSeconds(0.4f);
     }
 
     public void FillEmptyTiles()
     {
+        Debug.Log("Refill");
         for (int x = 0; x < Width; x++) 
             for (int y = 0; y < Height; y++) 
                 if (Indexes[x, y] == -1) {
