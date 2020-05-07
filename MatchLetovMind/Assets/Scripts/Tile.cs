@@ -45,6 +45,7 @@ public class Tile : MonoBehaviour
     private void OnMouseDown()
     {
         _firstTouchPos = GetCameraPos();
+        Debug.Log(Column + " " + Row + "  " + _board.Indexes[Column, Row]);
     }
 
     private void OnMouseUp()
@@ -118,7 +119,7 @@ public class Tile : MonoBehaviour
                     _board.Tiles[finalX, finalY].GetComponent<Tile>().SetPos(finalY, finalX);
                 } else {
                     _board.DestroyAllMatches();
-                    StartCoroutine(_board.FillEmptyTiles());
+                    _board.RefillBoard();
                 }
             }
         } else {

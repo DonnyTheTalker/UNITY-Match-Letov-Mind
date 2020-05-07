@@ -8,11 +8,11 @@ public class Board : MonoBehaviour
     [Header("Board Settings")]
     public int Width = 16;
     public int Height = 8;
-
-    [Header("Tile Setup")] 
     public GameObject[,] Tiles;
     public int[,] Indexes;
     public GameObject[] TilesPrefabs;
+
+    private Color _deathColor = new Color(255f, 0f, 0f, 0f);
 
     private void Start()
     {
@@ -35,11 +35,16 @@ public class Board : MonoBehaviour
 
     public void RemoveAllMatches()
     {
-        for (int x = 0; x < Width; x++) {
-            for (int y = 0; y < Height; y++) {
-                while (IsMatch(x, y)) {
-                    Destroy(Tiles[x, y].gameObject);
-                    SpawnTile(x, y);
+        bool hasMatch = true;
+        while (hasMatch) {
+            hasMatch = false;
+            for (int x = 0; x < Width; x++) {
+                for (int y = 0; y < Height; y++) {
+                    while (IsMatch(x, y)) {
+                        Destroy(Tiles[x, y].gameObject);
+                        SpawnTile(x, y);
+                        hasMatch = true;
+                    }
                 }
             }
         }
@@ -67,7 +72,7 @@ public class Board : MonoBehaviour
         return false;
     }
 
-    // define if we have a match of 3 (o more - doesn't matter)
+    // define if we have a match of 3 (or more - doesn't matter)
     // where tile with coordinates [x, y] is a middle element
     public bool IsMatch(int x, int y, bool horizontal = true, bool vertical = true)
     {
@@ -95,11 +100,21 @@ public class Board : MonoBehaviour
 
             if (Indexes[x, y] >= 0) {
                 Indexes[x, y] = -1;
-                Destroy(Tiles[x, y].gameObject);
+                DestroyTile(Tiles[x, y]);
+                Destroy(Tiles[x, y]);
                 Tiles[x, y] = null;
             }
 
         }
+
+    }
+
+    private void DestroyTile(GameObject tile)
+    {
+
+        Debug.Log("Destroing");
+        var spriteRenderer = tile.GetComponent<SpriteRenderer>();
+        spriteRenderer.color = new Color(spriteRenderer.color.r, spriteRenderer.color.g, spriteRenderer.color.b, 40f);
 
     }
 
@@ -128,8 +143,18 @@ public class Board : MonoBehaviour
         return matches;
     }
 
-    public IEnumerator FillEmptyTiles()
-    {
+    public void RefillBoard()
+    { 
+        FillEmptyTiles(); 
+        while (CanFindMatch()) {
+            Debug.Log("FOUND");
+            DestroyAllMatches();
+            FillEmptyTiles();  
+        }
+    }
+
+    public void FillEmptyTiles()
+    { 
         for (int x = 0; x < Width; x++) {
             for (int y = 0; y < Height; y++) {
                 if (Indexes[x, y] >= 0) {
@@ -142,7 +167,8 @@ public class Board : MonoBehaviour
                     tempRow++;
 
                     if (tempRow != y) {
-                        Indexes[x, tempRow] = Indexes[x, y];
+                        int temp = Indexes[x, y];
+                        Indexes[x, tempRow] = temp;
                         Indexes[x, y] = -1;
                         Tiles[x, tempRow] = Tiles[x, y];
                         Tiles[x, y] = null;
@@ -153,12 +179,6 @@ public class Board : MonoBehaviour
             }
         }
 
-        yield return new WaitForSeconds(0.4f);
-
-        if (CanFindMatch()) {
-            DestroyAllMatches();
-            StartCoroutine(FillEmptyTiles());
-        }
     }
 
 }
