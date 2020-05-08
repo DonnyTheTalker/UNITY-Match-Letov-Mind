@@ -124,6 +124,8 @@ public class Board : MonoBehaviour
 
     private IEnumerator DestroyTile(GameObject tile)
     {
+        LevelManager.TilesMatched++;
+
         var spriteRenderer = tile.GetComponent<SpriteRenderer>(); 
 
         float redOffset = (spriteRenderer.color.r - DeathColor.r) / 10f;

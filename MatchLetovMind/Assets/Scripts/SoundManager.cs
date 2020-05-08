@@ -31,7 +31,7 @@ public class SoundManager : MonoBehaviour
         CurrectClip = (CurrectClip + 1) % BackGroundClips.Length;
         MusicSource.clip = BackGroundClips[CurrectClip];
         MusicSource.Play();
-        Invoke("ChangeAudio", BackGroundClips[CurrectClip].length);
+        Invoke("ChangeBackgroundAudio", BackGroundClips[CurrectClip].length);
     }
 
     public void PlaySingle(AudioClip clip)

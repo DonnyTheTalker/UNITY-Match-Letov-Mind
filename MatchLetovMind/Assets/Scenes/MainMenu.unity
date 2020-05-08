@@ -331,6 +331,10 @@ MonoBehaviour:
   MusicSource: {fileID: 722556742}
   BackGroundClips:
   - {fileID: 8300000, guid: 0b0ac043ded16ae469be15d5c3ccff12, type: 3}
+  - {fileID: 8300000, guid: de090c75210f45444927b7a1415de118, type: 3}
+  - {fileID: 8300000, guid: 7932122c583747844982d25783eb11ab, type: 3}
+  - {fileID: 8300000, guid: 928f4ad99059d9a4d8ed895ea1b8c124, type: 3}
+  CurrectClip: -1
   LowPitchRange: 0.95
   HighPitchRange: 1.05
 --- !u!4 &722556740
@@ -454,8 +458,8 @@ AudioSource:
   serializedVersion: 4
   OutputAudioMixerGroup: {fileID: 0}
   m_audioClip: {fileID: 0}
-  m_PlayOnAwake: 1
-  m_Volume: 0.11
+  m_PlayOnAwake: 0
+  m_Volume: 0.06
   m_Pitch: 1
   Loop: 1
   Mute: 0
