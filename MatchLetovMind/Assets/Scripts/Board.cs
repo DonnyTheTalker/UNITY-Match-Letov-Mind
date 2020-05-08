@@ -21,6 +21,7 @@ public class Board : MonoBehaviour
 
     public GameObject[] TilesPrefabs;
     public GameObject SplashBombPrefab;
+    public GameObject ColorBombPrefab;
 
     public Color DeathColor;
 
@@ -244,11 +245,11 @@ public class Board : MonoBehaviour
     {
         CurrectState = GameState.Wait;
         do {
-            var bombs = new List<Tuple<int, int>>();
+            var bombs = new List<Tuple<int, int, GameObject>>();
             GetAllBombs(4, ref bombs);
             DestroyAllMatches();
             yield return new WaitForSeconds(0.3f);
-            SpawnBombs(bombs, SplashBombPrefab);
+            SpawnBombs(bombs);
             StartCoroutine(LowerTiles());
             yield return new WaitForSeconds(0.3f);
             FillEmptyTiles();
@@ -257,11 +258,11 @@ public class Board : MonoBehaviour
         CurrectState = GameState.Move;
     }
 
-    private void SpawnBombs(List<Tuple<int, int>> bombs, GameObject BombPrefab, int index = -2)
+    private void SpawnBombs(List<Tuple<int, int, GameObject>> bombs, int index = -2)
     {
         for (int i = 0; i < bombs.Count; i++) {
 
-            SpawnBomb(bombs[i].Item1, bombs[i].Item2, BombPrefab, index);
+            SpawnBomb(bombs[i].Item1, bombs[i].Item2, bombs[i].Item3, index);
 
         }
     }
@@ -328,7 +329,7 @@ public class Board : MonoBehaviour
                 }
     }
 
-    private void GetAllBombs(int requiredRange, ref List<Tuple<int, int>> regularBombs)
+    private void GetAllBombs(int requiredRange, ref List<Tuple<int, int, GameObject>> regularBombs)
     {
 
         bool[,] used = new bool[Width, Height];
@@ -342,7 +343,10 @@ public class Board : MonoBehaviour
                 if (!used[x, y] && Indexes[x, y] != -1) {
                     int nTiles = GetGroupSizeAtPoint(x, y);
                     if (nTiles >= 4) {
-                        regularBombs.Add(new Tuple<int, int>(x, y));
+                        regularBombs.Add(new Tuple<int, int, GameObject>(x, y, ColorBombPrefab));
+                        DisableSameGroup(x, y, ref used);
+                    } else if (nTiles >= 4) {
+                        regularBombs.Add(new Tuple<int, int, GameObject>(x, y, SplashBombPrefab));
                         DisableSameGroup(x, y, ref used);
                     }
                 }

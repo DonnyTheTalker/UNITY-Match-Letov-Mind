@@ -249,4 +249,6 @@ MonoBehaviour:
   - {fileID: 8486244630835154368, guid: 76ba6c2c820bf6f4cadfb93e1cf93275, type: 3}
   SplashBombPrefab: {fileID: 9053622205990962250, guid: cc2020953488b3641a286af52bde8bf6,
     type: 3}
+  ColorBombPrefab: {fileID: 7190221048931847523, guid: 0e779b0dfae0d224b82ac47eef0051bb,
+    type: 3}
   DeathColor: {r: 11.72602, g: 11.72602, b: 11.72602, a: 0.40392157}
