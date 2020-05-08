@@ -5,7 +5,7 @@ using UnityEngine;
 public class MainMenu : MonoBehaviour
 {
     [SerializeField] private SceneFader _sceneFader;
-    public string LevelHub;
+    public string MainLevelScene;
 
     public void Exit()
     {
@@ -14,7 +14,7 @@ public class MainMenu : MonoBehaviour
 
     public void Play()
     {
-        _sceneFader.FadeTo(LevelHub);
+        _sceneFader.FadeTo(MainLevelScene);
     }
 
 }

@@ -412,7 +412,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   _sceneFader: {fileID: 2001868304}
-  LevelHub: MainLevel
+  MainLevelScene: MainLevel
 --- !u!95 &769844288
 Animator:
   serializedVersion: 3
