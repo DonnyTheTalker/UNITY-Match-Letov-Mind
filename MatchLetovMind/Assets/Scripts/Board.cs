@@ -144,6 +144,35 @@ public class Board : MonoBehaviour
 
     }
 
+    private IEnumerator DestroyBomb(GameObject bomb, List<Tuple<int, int>> whereToDestroy)
+    {
+        float scaleOffeset = 0.3f;
+
+        for (int i = 0; i < 10; i++) {
+            bomb.transform.localScale = new Vector3(bomb.transform.localScale.x + scaleOffeset,
+                                                    bomb.transform.localScale.y + scaleOffeset,
+                                                    bomb.transform.localScale.z + scaleOffeset);
+            yield return new WaitForSeconds(0.01f);
+        }
+
+        int[] dX = { 0, 0, 1, 1, 1, -1, -1, -1};
+        int[] dY = { 1, -1, 0, 1, -1, 0, 1, -1};
+
+        var bombTile = bomb.GetComponent<Tile>();
+
+        int x = bombTile.Column, y = bombTile.Row;
+
+        for (int i = 0; i < 8; i++) {
+
+            int x1 = x + dX[i], y1 = y + dY[i];
+
+            if (x1 < Width && y1 < Height && x1 >= 0 && y1 >= 0) 
+                if (Indexes[x1, y1] != -1)
+                    whereToDestroy.Add(new Tuple<int, int>(x1, y1));
+
+        } 
+    }
+
     public List<Tuple<int, int>> GetAllMaches()
     {
         List<Tuple<int, int>> matches = new List<Tuple<int, int>>();
@@ -169,6 +198,43 @@ public class Board : MonoBehaviour
         return matches;
     }
 
+    public void StartExplosion(int x, int y)
+    {
+        StartCoroutine(MakeExplosion(x, y));
+    }
+
+    public IEnumerator MakeExplosion(int x, int y)
+    {
+        List<Tuple<int, int>> tilesToDestroy = new List<Tuple<int, int>>();
+        tilesToDestroy.Add(new Tuple<int, int>(x, y));
+
+        while (tilesToDestroy.Count > 0) {
+            List<Tuple<int, int>> nextWave = new List<Tuple<int, int>>();
+
+            for (int i = 0; i < tilesToDestroy.Count; i++) {
+                int x1 = tilesToDestroy[i].Item1, y1 = tilesToDestroy[i].Item2;
+
+                if (Indexes[x1, y1] != -1) {
+                    if (Indexes[x1, y1] == -2)
+                        StartCoroutine(DestroyBomb(Tiles[x1, y1], nextWave));
+                    else
+                        StartCoroutine(DestroyTile(Tiles[x1, y1]));
+                 
+                    Indexes[x1, y1] = -1;
+                    Destroy(Tiles[x1, y1], 0.3f);
+                    Tiles[x1, y1] = null;
+                }
+
+            }
+
+            tilesToDestroy = nextWave;
+            yield return new WaitForSeconds(0.3f);
+        }
+
+        StartCoroutine(RefillBoard());
+
+    }
+
     public void StartRefill()
     {
         StartCoroutine(RefillBoard());
@@ -177,7 +243,7 @@ public class Board : MonoBehaviour
     public IEnumerator RefillBoard()
     {
         CurrectState = GameState.Wait;
-        while (CanFindMatch()) { 
+        do {
             var bombs = GetAllBombs(4);
             DestroyAllMatches();
             yield return new WaitForSeconds(0.3f);
@@ -186,7 +252,7 @@ public class Board : MonoBehaviour
             yield return new WaitForSeconds(0.3f);
             FillEmptyTiles();
             yield return new WaitForSeconds(0.3f);
-        }
+        } while (CanFindMatch());
         CurrectState = GameState.Move;
     }
 
@@ -273,7 +339,7 @@ public class Board : MonoBehaviour
 
         for (int x = 0; x < Width; x++)
             for (int y = 0; y < Height; y++)
-                if (!used[x, y] && GetGroupSizeAtPoint(x, y, used) >= requiredRange) {
+                if (!used[x, y] && Indexes[x, y] != -1 && GetGroupSizeAtPoint(x, y, used) >= requiredRange) {
                     bombs.Add(new Tuple<int, int>(x, y));
                 }
  

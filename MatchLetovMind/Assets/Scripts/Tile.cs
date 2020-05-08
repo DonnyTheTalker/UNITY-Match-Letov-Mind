@@ -108,21 +108,28 @@ public class Tile : MonoBehaviour
 
                 yield return new WaitForSeconds(0.3f);
 
-                if (!_board.CanFindMatch()) { 
+                if (_board.Indexes[Column, Row] == -2) {
+                    _board.StartExplosion(Column, Row);
+                } else if (_board.Indexes[finalX, finalY] == -2) {
+                    _board.StartExplosion(finalX, finalY);
+                }
+                else { 
+                    if (!_board.CanFindMatch()) {
 
-                    _board.CurrectState = GameState.Move;
+                        _board.CurrectState = GameState.Move;
 
-                    _board.Tiles[finalX, finalY] = _board.Tiles[tempX, tempY];
-                    _board.Tiles[tempX, tempY] = this.gameObject;
+                        _board.Tiles[finalX, finalY] = _board.Tiles[tempX, tempY];
+                        _board.Tiles[tempX, tempY] = this.gameObject;
 
-                    temp = _board.Indexes[tempX, tempY];
-                    _board.Indexes[tempX, tempY] = _board.Indexes[finalX, finalY];
-                    _board.Indexes[finalX, finalY] = temp;
+                        temp = _board.Indexes[tempX, tempY];
+                        _board.Indexes[tempX, tempY] = _board.Indexes[finalX, finalY];
+                        _board.Indexes[finalX, finalY] = temp;
 
-                    SetPos(tempY, tempX);
-                    _board.Tiles[finalX, finalY].GetComponent<Tile>().SetPos(finalY, finalX);
-                } else {
-                    _board.StartRefill();
+                        SetPos(tempY, tempX);
+                        _board.Tiles[finalX, finalY].GetComponent<Tile>().SetPos(finalY, finalX);
+                    } else {
+                        _board.StartRefill();
+                    }
                 }
             }
         } else {
