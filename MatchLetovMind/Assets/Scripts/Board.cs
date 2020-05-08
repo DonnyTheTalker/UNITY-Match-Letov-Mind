@@ -124,7 +124,7 @@ public class Board : MonoBehaviour
 
     private IEnumerator DestroyTile(GameObject tile)
     {
-        var spriteRenderer = tile.GetComponent<SpriteRenderer>();
+        var spriteRenderer = tile.GetComponent<SpriteRenderer>(); 
 
         float redOffset = (spriteRenderer.color.r - DeathColor.r) / 10f;
         float greenOffset = (spriteRenderer.color.g - DeathColor.g) / 10f;
@@ -148,6 +148,7 @@ public class Board : MonoBehaviour
     private IEnumerator DestroyBomb(GameObject bomb, List<Tuple<int, int>> whereToDestroy)
     {
         float scaleOffeset = 0.3f;
+        bomb.GetComponent<SpriteRenderer>().sortingOrder++;
 
         for (int i = 0; i < 10; i++) {
             bomb.transform.localScale = new Vector3(bomb.transform.localScale.x + scaleOffeset,
@@ -178,6 +179,8 @@ public class Board : MonoBehaviour
     {
         float rotationOffset = 30f;
         Debug.Log("HELP");
+
+        bomb.GetComponent<SpriteRenderer>().sortingOrder++;
 
         for (int x = 0; x < Width; x++)
             for (int y = 0; y < Height; y++)
@@ -265,7 +268,7 @@ public class Board : MonoBehaviour
 
     public void StartRefill()
     {
-        StartCoroutine(RefillBoard());
+        StartCoroutine(RefillBoard()); 
     }
 
     public IEnumerator RefillBoard()
