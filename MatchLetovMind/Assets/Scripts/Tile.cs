@@ -52,7 +52,7 @@ public class Tile : MonoBehaviour
         int finalX = (int)Mathf.Round(_finalTouchPos.x);
         int finalY = (int)Mathf.Round(_finalTouchPos.y);
 
-        if (Column == finalX && Row == finalY) 
+        if (Column == finalX && Row == finalY || _board.CurrectState == GameState.Wait)
             return;
 
         GetMovedPos(ref finalX, ref finalY);  
@@ -84,13 +84,15 @@ public class Tile : MonoBehaviour
 
     private IEnumerator SwapTiles(int finalX, int finalY)
     {
-        int tempX = Column, tempY = Row;
+        int tempX = Column, tempY = Row; 
 
         if (!(finalY < 0 || finalX < 0 || finalX >= _board.Width || finalY >= _board.Height)) {
 
             if (_board.Indexes[finalX, finalY] == -1) {
                 yield return null;
-            } else {
+            } else { 
+
+                _board.CurrectState = GameState.Wait;
 
                 _board.Tiles[Column, Row] = _board.Tiles[finalX, finalY];
                 _board.Tiles[finalX, finalY] = this.gameObject;
@@ -104,7 +106,10 @@ public class Tile : MonoBehaviour
 
                 yield return new WaitForSeconds(0.3f);
 
-                if (!_board.CanFindMatch()) {
+                if (!_board.CanFindMatch()) { 
+
+                    _board.CurrectState = GameState.Move;
+
                     _board.Tiles[finalX, finalY] = _board.Tiles[tempX, tempY];
                     _board.Tiles[tempX, tempY] = this.gameObject;
 

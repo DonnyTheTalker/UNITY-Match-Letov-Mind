@@ -3,15 +3,23 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
+public enum GameState
+{
+    Move, Wait
+}
+
 public class Board : MonoBehaviour
 {
     [Header("Board Settings")]
     public int Width = 16;
     public int Height = 8;
+
+    public GameState CurrectState = GameState.Move;
     public GameObject[,] Tiles;
     public int[,] Indexes;
+    
     public GameObject[] TilesPrefabs;
-
+    
     public Color DeathColor;
 
     private void Start()
@@ -20,6 +28,7 @@ public class Board : MonoBehaviour
         Indexes = new int[Width, Height];
         Setup();
         RemoveAllMatches();
+        CurrectState = GameState.Move;
     }
 
     private void Setup()
@@ -167,7 +176,8 @@ public class Board : MonoBehaviour
     }
 
     public IEnumerator RefillBoard()
-    {  
+    {
+        CurrectState = GameState.Wait;
         while (CanFindMatch()) {
             Debug.Log("Coroutine");
             DestroyAllMatches();
@@ -176,7 +186,8 @@ public class Board : MonoBehaviour
             yield return new WaitForSeconds(0.3f);
             FillEmptyTiles();
             yield return new WaitForSeconds(0.3f);
-        } 
+        }
+        CurrectState = GameState.Move;
     }
 
     public IEnumerator LowerTiles()
