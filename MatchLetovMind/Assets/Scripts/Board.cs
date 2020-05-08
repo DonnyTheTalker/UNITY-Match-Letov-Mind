@@ -174,6 +174,29 @@ public class Board : MonoBehaviour
         }
     }
 
+    private IEnumerator DestroyColorBomb(GameObject bomb, int index, List<Tuple<int, int>> whereToDestroy)
+    {
+        float rotationOffset = 30f;
+        Debug.Log("HELP");
+
+        for (int x = 0; x < Width; x++)
+            for (int y = 0; y < Height; y++)
+                if (Indexes[x, y] == index)
+                    whereToDestroy.Add(new Tuple<int, int>(x, y));
+
+        for (int i = 0; i < 20; i++) {
+            if (bomb != null) {
+                bomb.transform.Rotate(new Vector3(0f, 0f, rotationOffset));
+                bomb.transform.localScale = new Vector3(bomb.transform.localScale.x + 0.05f,
+                                                    bomb.transform.localScale.y + 0.05f,
+                                                    bomb.transform.localScale.z);
+            } else
+                break;
+            yield return new WaitForSeconds(0.005f);
+        } 
+
+    }
+
     public List<Tuple<int, int>> GetAllMaches()
     {
         List<Tuple<int, int>> matches = new List<Tuple<int, int>>();
@@ -197,14 +220,15 @@ public class Board : MonoBehaviour
         }
 
         return matches;
-    }
+    } 
 
-    public void StartExplosion(int x, int y)
+    public void StartExplosion(int x, int y, int index = 0)
     {
-        StartCoroutine(MakeExplosion(x, y));
+        if (index < 0) index = 0;
+        StartCoroutine(MakeExplosion(x, y, index));
     }
 
-    public IEnumerator MakeExplosion(int x, int y)
+    public IEnumerator MakeExplosion(int x, int y, int index)
     {
         List<Tuple<int, int>> tilesToDestroy = new List<Tuple<int, int>>();
         tilesToDestroy.Add(new Tuple<int, int>(x, y));
@@ -218,7 +242,10 @@ public class Board : MonoBehaviour
                 if (Indexes[x1, y1] != -1) {
                     if (Indexes[x1, y1] == -2)
                         StartCoroutine(DestroyBomb(Tiles[x1, y1], nextWave));
-                    else
+                    else if (Indexes[x1, y1] == -3) {
+                        StartCoroutine(DestroyColorBomb(Tiles[x1, y1], index, nextWave));
+                        index = (index + 1) % TilesPrefabs.Length;
+                    } else
                         StartCoroutine(DestroyTile(Tiles[x1, y1]));
 
                     Indexes[x1, y1] = -1;
@@ -258,16 +285,16 @@ public class Board : MonoBehaviour
         CurrectState = GameState.Move;
     }
 
-    private void SpawnBombs(List<Tuple<int, int, GameObject>> bombs, int index = -2)
+    private void SpawnBombs(List<Tuple<int, int, GameObject>> bombs)
     {
         for (int i = 0; i < bombs.Count; i++) {
 
-            SpawnBomb(bombs[i].Item1, bombs[i].Item2, bombs[i].Item3, index);
+            SpawnBomb(bombs[i].Item1, bombs[i].Item2, bombs[i].Item3, bombs[i].Item3 == ColorBombPrefab ? -3 : -2);
 
         }
     }
 
-    private void SpawnBomb(int x, int y, GameObject prefab, int index = -2)
+    private void SpawnBomb(int x, int y, GameObject prefab, int index)
     {
         Vector2 tilePosition = new Vector2(x, y);
         GameObject tile = Instantiate(prefab, tilePosition, Quaternion.identity) as GameObject;
@@ -342,7 +369,7 @@ public class Board : MonoBehaviour
             for (int y = 0; y < Height; y++)
                 if (!used[x, y] && Indexes[x, y] != -1) {
                     int nTiles = GetGroupSizeAtPoint(x, y);
-                    if (nTiles >= 4) {
+                    if (nTiles >= 5) {
                         regularBombs.Add(new Tuple<int, int, GameObject>(x, y, ColorBombPrefab));
                         DisableSameGroup(x, y, ref used);
                     } else if (nTiles >= 4) {

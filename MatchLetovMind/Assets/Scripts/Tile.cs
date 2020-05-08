@@ -43,12 +43,10 @@ public class Tile : MonoBehaviour
     private void OnMouseDown()
     {
         _firstTouchPos = GetCameraPos();
-        Debug.Log("Down");
     }
 
     private void OnMouseUp()
     { 
-        Debug.Log("Up");
         _finalTouchPos = GetCameraPos();
 
         int finalX = (int)Mathf.Round(_finalTouchPos.x);
@@ -104,14 +102,18 @@ public class Tile : MonoBehaviour
                 _board.Indexes[finalX, finalY] = temp;
 
                 _board.Tiles[Column, Row].GetComponent<Tile>().SetPos(Row, Column);
-                SetPos(finalY, finalX);
+                SetPos(finalY, finalX); 
 
                 yield return new WaitForSeconds(0.3f); 
 
                 if (_board.Indexes[Column, Row] == -2) {
                     _board.StartExplosion(Column, Row);
-                } else if (temp == -2) {
-                    _board.StartExplosion(finalX, finalY);
+                } else if (_board.Indexes[tempX, tempY] == -2) {
+                    _board.StartExplosion(tempX, tempY);
+                } else if (_board.Indexes[Column, Row] == -3) {
+                    _board.StartExplosion(Column, Row, _board.Indexes[tempX, tempY]);
+                } else if (_board.Indexes[tempX, tempY] == -3) {
+                    _board.StartExplosion(tempX, tempY, _board.Indexes[Column, Row]);
                 }
                 else { 
                     if (!_board.CanFindMatch()) {
