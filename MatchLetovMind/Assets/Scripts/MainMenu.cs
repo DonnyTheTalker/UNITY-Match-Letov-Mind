@@ -4,15 +4,17 @@ using UnityEngine;
 
 public class MainMenu : MonoBehaviour
 {
-    // Start is called before the first frame update
-    void Start()
+    [SerializeField] private SceneFader _sceneFader;
+    public string LevelHub;
+
+    public void Exit()
     {
-        
+        Application.Quit();
     }
 
-    // Update is called once per frame
-    void Update()
+    public void Play()
     {
-        
+        _sceneFader.FadeTo(LevelHub);
     }
+
 }
