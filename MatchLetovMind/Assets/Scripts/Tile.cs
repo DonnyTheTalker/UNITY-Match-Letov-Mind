@@ -42,11 +42,13 @@ public class Tile : MonoBehaviour
 
     private void OnMouseDown()
     {
-        _firstTouchPos = GetCameraPos(); 
+        _firstTouchPos = GetCameraPos();
+        Debug.Log("Down");
     }
 
     private void OnMouseUp()
-    {
+    { 
+        Debug.Log("Up");
         _finalTouchPos = GetCameraPos();
 
         int finalX = (int)Mathf.Round(_finalTouchPos.x);

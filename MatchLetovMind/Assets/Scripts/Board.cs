@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Xml.Schema;
 using UnityEngine;
 
 public enum GameState
@@ -19,6 +20,7 @@ public class Board : MonoBehaviour
     public int[,] Indexes;
     
     public GameObject[] TilesPrefabs;
+    public GameObject SplashBombPrefab;
     
     public Color DeathColor;
 
@@ -73,8 +75,7 @@ public class Board : MonoBehaviour
     }
 
     public bool CanFindMatch()
-    {
-        Debug.Log("CanFindMatch");
+    { 
         for (int x = 0; x < Width; x++)
             for (int y = 0; y < Height; y++)
                 if (IsMatch(x, y))
@@ -88,12 +89,12 @@ public class Board : MonoBehaviour
     public bool IsMatch(int x, int y, bool horizontal = true, bool vertical = true)
     {
         if (x > 0 && x < Width - 1 && horizontal) {
-            if (Indexes[x, y] == Indexes[x - 1, y] && Indexes[x, y] >= 0 && Indexes[x + 1, y] == Indexes[x, y])
+            if (Indexes[x, y] == Indexes[x - 1, y] && Indexes[x, y] != -1 && Indexes[x + 1, y] == Indexes[x, y])
                 return true;
         }
 
         if (y > 0 && y < Height - 1 && vertical) {
-            if (Indexes[x, y] == Indexes[x, y - 1] && Indexes[x, y] >= 0 && Indexes[x, y + 1] == Indexes[x, y])
+            if (Indexes[x, y] == Indexes[x, y - 1] && Indexes[x, y] != -1 && Indexes[x, y + 1] == Indexes[x, y])
                 return true;
         }
 
@@ -101,8 +102,7 @@ public class Board : MonoBehaviour
     }
 
     public void DestroyAllMatches()
-    {
-        Debug.Log("Destoy");
+    { 
         var matches = GetAllMaches();
 
         for (int i = 0; i < matches.Count; i++) {
@@ -110,7 +110,7 @@ public class Board : MonoBehaviour
             int x = matches[i].Item1;
             int y = matches[i].Item2;
 
-            if (Indexes[x, y] >= 0) {
+            if (Indexes[x, y] != -1) {
                 Indexes[x, y] = -1;
                 StartCoroutine(DestroyTile(Tiles[x, y]));
                 Destroy(Tiles[x, y], 0.3f);
@@ -122,8 +122,7 @@ public class Board : MonoBehaviour
     }
 
     private IEnumerator DestroyTile(GameObject tile)
-    { 
-        Debug.Log("Destroing");
+    {  
         var spriteRenderer = tile.GetComponent<SpriteRenderer>(); 
 
         float redOffset = (spriteRenderer.color.r - DeathColor.r) / 10f;
@@ -178,10 +177,11 @@ public class Board : MonoBehaviour
     public IEnumerator RefillBoard()
     {
         CurrectState = GameState.Wait;
-        while (CanFindMatch()) {
-            Debug.Log("Coroutine");
+        while (CanFindMatch()) { 
+            var bombs = GetAllBombs(4);
             DestroyAllMatches();
             yield return new WaitForSeconds(0.3f);
+            SpawnBombs(bombs, SplashBombPrefab);
             StartCoroutine(LowerTiles());
             yield return new WaitForSeconds(0.3f);
             FillEmptyTiles();
@@ -190,12 +190,32 @@ public class Board : MonoBehaviour
         CurrectState = GameState.Move;
     }
 
-    public IEnumerator LowerTiles()
+    private void SpawnBombs(List<Tuple<int, int>> bombs, GameObject BombPrefab, int index = -2)
     {
-        Debug.Log("Lower");
+        for (int i = 0; i < bombs.Count; i++) {
+
+            SpawnBomb(bombs[i].Item1, bombs[i].Item2, BombPrefab, index);
+
+        }
+    }
+
+    private void SpawnBomb(int x, int y, GameObject prefab, int index = -2)
+    {
+        Vector2 tilePosition = new Vector2(x, y); 
+        GameObject tile = Instantiate(prefab, tilePosition, Quaternion.identity) as GameObject;
+
+        tile.GetComponent<Tile>().SetPos(y, x);
+        tile.transform.parent = this.transform;
+        tile.name = "( " + x + ", " + y + ")";
+        Tiles[x, y] = tile;
+        Indexes[x, y] = index;
+    }
+
+    public IEnumerator LowerTiles()
+    { 
         for (int x = 0; x < Width; x++) {
             for (int y = 0; y < Height; y++) {
-                if (Indexes[x, y] >= 0) {
+                if (Indexes[x, y] != -1) {
 
                     // counting empty spaces under non-empty tile
                     int tempRow = y - 1;
@@ -220,8 +240,7 @@ public class Board : MonoBehaviour
     }
 
     public void FillEmptyTiles()
-    {
-        Debug.Log("Refill");
+    { 
         for (int x = 0; x < Width; x++) 
             for (int y = 0; y < Height; y++) 
                 if (Indexes[x, y] == -1) {
@@ -240,6 +259,54 @@ public class Board : MonoBehaviour
 
                     break;
                 }
+    }
+
+    private List<Tuple<int, int>> GetAllBombs(int requiredRange)
+    {
+        List<Tuple<int, int>> bombs = new List<Tuple<int, int>>();
+
+        bool[,] used = new bool[Width, Height];
+
+        for (int x = 0; x < Width; x++)
+            for (int y = 0; y < Height; y++)
+                used[x, y] = false;
+
+        for (int x = 0; x < Width; x++)
+            for (int y = 0; y < Height; y++)
+                if (!used[x, y] && GetGroupSizeAtPoint(x, y, used) >= requiredRange) {
+                    bombs.Add(new Tuple<int, int>(x, y));
+                }
+ 
+
+        return bombs;
+    }
+
+    private int GetGroupSizeAtPoint(int startX, int startY, bool[,] used)
+    {
+        int maxVertival = 0;
+        int maxHorizontal = 0;
+
+        int tempX = startX;
+        int tempY = startY;
+
+        while (tempX < Width && !used[tempX, startY] && Indexes[tempX, startY] == Indexes[startX, startY]) {
+            maxHorizontal++;
+            used[tempX, startY] = true;
+            tempX++;
+        }
+
+        used[startX, startY] = false;
+
+        while (tempY < Height && !used[startX, tempY] && Indexes[startX, tempY] == Indexes[startX, startY]) {
+            maxVertival++; 
+            used[startX, tempY] = true;
+            tempY++;
+        } 
+
+        if (maxVertival > 2 && maxHorizontal > 2) 
+            return maxVertival + maxHorizontal - 1;
+        return Math.Max(maxVertival, maxHorizontal);
+        
     }
 
 }

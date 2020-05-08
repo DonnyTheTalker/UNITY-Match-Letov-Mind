@@ -239,6 +239,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   Width: 16
   Height: 8
+  CurrectState: 0
   TilesPrefabs:
   - {fileID: 2034469194091260071, guid: 4f8a78ab9d5f2b4408fcaef47885577d, type: 3}
   - {fileID: 5970158630694190940, guid: 956138d4c430d0d49886c708eb95d2bb, type: 3}
@@ -246,4 +247,6 @@ MonoBehaviour:
   - {fileID: 1024549018956026695, guid: 7e6256cd791cbba479de07addf1f938d, type: 3}
   - {fileID: 2750738491661816092, guid: 8afadda1348951e4f83aba984956c4e7, type: 3}
   - {fileID: 8486244630835154368, guid: 76ba6c2c820bf6f4cadfb93e1cf93275, type: 3}
+  SplashBombPrefab: {fileID: 9053622205990962250, guid: cc2020953488b3641a286af52bde8bf6,
+    type: 3}
   DeathColor: {r: 11.72602, g: 11.72602, b: 11.72602, a: 0.40392157}
