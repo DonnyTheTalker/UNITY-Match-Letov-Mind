@@ -106,11 +106,11 @@ public class Tile : MonoBehaviour
                 _board.Tiles[Column, Row].GetComponent<Tile>().SetPos(Row, Column);
                 SetPos(finalY, finalX);
 
-                yield return new WaitForSeconds(0.3f);
+                yield return new WaitForSeconds(0.3f); 
 
                 if (_board.Indexes[Column, Row] == -2) {
                     _board.StartExplosion(Column, Row);
-                } else if (_board.Indexes[finalX, finalY] == -2) {
+                } else if (temp == -2) {
                     _board.StartExplosion(finalX, finalY);
                 }
                 else { 

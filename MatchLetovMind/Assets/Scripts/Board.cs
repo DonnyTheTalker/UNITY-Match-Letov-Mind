@@ -18,10 +18,10 @@ public class Board : MonoBehaviour
     public GameState CurrectState = GameState.Move;
     public GameObject[,] Tiles;
     public int[,] Indexes;
-    
+
     public GameObject[] TilesPrefabs;
     public GameObject SplashBombPrefab;
-    
+
     public Color DeathColor;
 
     private void Start()
@@ -42,7 +42,7 @@ public class Board : MonoBehaviour
 
             }
         }
-    } 
+    }
 
     public void RemoveAllMatches()
     {
@@ -75,7 +75,7 @@ public class Board : MonoBehaviour
     }
 
     public bool CanFindMatch()
-    { 
+    {
         for (int x = 0; x < Width; x++)
             for (int y = 0; y < Height; y++)
                 if (IsMatch(x, y))
@@ -102,7 +102,7 @@ public class Board : MonoBehaviour
     }
 
     public void DestroyAllMatches()
-    { 
+    {
         var matches = GetAllMaches();
 
         for (int i = 0; i < matches.Count; i++) {
@@ -122,8 +122,8 @@ public class Board : MonoBehaviour
     }
 
     private IEnumerator DestroyTile(GameObject tile)
-    {  
-        var spriteRenderer = tile.GetComponent<SpriteRenderer>(); 
+    {
+        var spriteRenderer = tile.GetComponent<SpriteRenderer>();
 
         float redOffset = (spriteRenderer.color.r - DeathColor.r) / 10f;
         float greenOffset = (spriteRenderer.color.g - DeathColor.g) / 10f;
@@ -155,8 +155,8 @@ public class Board : MonoBehaviour
             yield return new WaitForSeconds(0.01f);
         }
 
-        int[] dX = { 0, 0, 1, 1, 1, -1, -1, -1};
-        int[] dY = { 1, -1, 0, 1, -1, 0, 1, -1};
+        int[] dX = { 0, 0, 1, 1, 1, -1, -1, -1 };
+        int[] dY = { 1, -1, 0, 1, -1, 0, 1, -1 };
 
         var bombTile = bomb.GetComponent<Tile>();
 
@@ -166,11 +166,11 @@ public class Board : MonoBehaviour
 
             int x1 = x + dX[i], y1 = y + dY[i];
 
-            if (x1 < Width && y1 < Height && x1 >= 0 && y1 >= 0) 
+            if (x1 < Width && y1 < Height && x1 >= 0 && y1 >= 0)
                 if (Indexes[x1, y1] != -1)
                     whereToDestroy.Add(new Tuple<int, int>(x1, y1));
 
-        } 
+        }
     }
 
     public List<Tuple<int, int>> GetAllMaches()
@@ -179,7 +179,7 @@ public class Board : MonoBehaviour
 
         for (int x = 0; x < Width; x++) {
             for (int y = 0; y < Height; y++) {
-                
+
                 if (IsMatch(x, y, true, false)) {
                     matches.Add(new Tuple<int, int>(x, y));
                     matches.Add(new Tuple<int, int>(x + 1, y));
@@ -219,7 +219,7 @@ public class Board : MonoBehaviour
                         StartCoroutine(DestroyBomb(Tiles[x1, y1], nextWave));
                     else
                         StartCoroutine(DestroyTile(Tiles[x1, y1]));
-                 
+
                     Indexes[x1, y1] = -1;
                     Destroy(Tiles[x1, y1], 0.3f);
                     Tiles[x1, y1] = null;
@@ -244,7 +244,8 @@ public class Board : MonoBehaviour
     {
         CurrectState = GameState.Wait;
         do {
-            var bombs = GetAllBombs(4);
+            var bombs = new List<Tuple<int, int>>();
+            GetAllBombs(4, ref bombs);
             DestroyAllMatches();
             yield return new WaitForSeconds(0.3f);
             SpawnBombs(bombs, SplashBombPrefab);
@@ -267,7 +268,7 @@ public class Board : MonoBehaviour
 
     private void SpawnBomb(int x, int y, GameObject prefab, int index = -2)
     {
-        Vector2 tilePosition = new Vector2(x, y); 
+        Vector2 tilePosition = new Vector2(x, y);
         GameObject tile = Instantiate(prefab, tilePosition, Quaternion.identity) as GameObject;
 
         tile.GetComponent<Tile>().SetPos(y, x);
@@ -278,7 +279,7 @@ public class Board : MonoBehaviour
     }
 
     public IEnumerator LowerTiles()
-    { 
+    {
         for (int x = 0; x < Width; x++) {
             for (int y = 0; y < Height; y++) {
                 if (Indexes[x, y] != -1) {
@@ -306,14 +307,14 @@ public class Board : MonoBehaviour
     }
 
     public void FillEmptyTiles()
-    { 
-        for (int x = 0; x < Width; x++) 
-            for (int y = 0; y < Height; y++) 
+    {
+        for (int x = 0; x < Width; x++)
+            for (int y = 0; y < Height; y++)
                 if (Indexes[x, y] == -1) {
 
                     int tempRow = Height;
 
-                    while (y < Height) { 
+                    while (y < Height) {
                         SpawnTile(x, y);
                         var tile = Tiles[x, y].GetComponent<Tile>();
                         tile.transform.position = new Vector3(x, tempRow, 0f);
@@ -327,9 +328,8 @@ public class Board : MonoBehaviour
                 }
     }
 
-    private List<Tuple<int, int>> GetAllBombs(int requiredRange)
+    private void GetAllBombs(int requiredRange, ref List<Tuple<int, int>> regularBombs)
     {
-        List<Tuple<int, int>> bombs = new List<Tuple<int, int>>();
 
         bool[,] used = new bool[Width, Height];
 
@@ -339,15 +339,17 @@ public class Board : MonoBehaviour
 
         for (int x = 0; x < Width; x++)
             for (int y = 0; y < Height; y++)
-                if (!used[x, y] && Indexes[x, y] != -1 && GetGroupSizeAtPoint(x, y, used) >= requiredRange) {
-                    bombs.Add(new Tuple<int, int>(x, y));
+                if (!used[x, y] && Indexes[x, y] != -1) {
+                    int nTiles = GetGroupSizeAtPoint(x, y);
+                    if (nTiles >= 4) {
+                        regularBombs.Add(new Tuple<int, int>(x, y));
+                        DisableSameGroup(x, y, ref used);
+                    }
                 }
- 
 
-        return bombs;
     }
 
-    private int GetGroupSizeAtPoint(int startX, int startY, bool[,] used)
+    private int GetGroupSizeAtPoint(int startX, int startY)
     {
         int maxVertival = 0;
         int maxHorizontal = 0;
@@ -355,24 +357,51 @@ public class Board : MonoBehaviour
         int tempX = startX;
         int tempY = startY;
 
-        while (tempX < Width && !used[tempX, startY] && Indexes[tempX, startY] == Indexes[startX, startY]) {
+        while (tempX < Width && Indexes[tempX, startY] == Indexes[startX, startY]) {
             maxHorizontal++;
-            used[tempX, startY] = true;
             tempX++;
         }
 
-        used[startX, startY] = false;
 
-        while (tempY < Height && !used[startX, tempY] && Indexes[startX, tempY] == Indexes[startX, startY]) {
-            maxVertival++; 
-            used[startX, tempY] = true;
+        while (tempY < Height && Indexes[startX, tempY] == Indexes[startX, startY]) {
+            maxVertival++;
             tempY++;
-        } 
+        }
 
-        if (maxVertival > 2 && maxHorizontal > 2) 
+        if (maxVertival > 2 && maxHorizontal > 2)
             return maxVertival + maxHorizontal - 1;
+
         return Math.Max(maxVertival, maxHorizontal);
-        
+
     }
 
+    private void DisableSameGroup(int startX, int startY, ref bool[,] used)
+    {
+        int maxVertival = 0;
+        int maxHorizontal = 0;
+
+        int tempX = startX;
+        int tempY = startY;
+
+        while (tempX < Width && Indexes[tempX, startY] == Indexes[startX, startY]) {
+            maxHorizontal++;
+            tempX++;
+        }
+
+
+        while (tempY < Height && Indexes[startX, tempY] == Indexes[startX, startY]) {
+            maxVertival++;
+            tempY++;
+        }
+
+        if (maxHorizontal > 2)
+            for (int x = startX; x < tempX; x++)
+                used[x, startY] = true;
+
+
+        if (maxVertival > 2)
+            for (int y = startY; y < tempY; y++)
+                used[startX, y] = true;
+
+    }
 }
