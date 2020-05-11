@@ -20,13 +20,13 @@ public class LevelManager : MonoBehaviour
 
         int curSong = SoundManager.Instance.CurrectClip;
         float tempText = SoundManager.Instance.BackGroundClips[curSong].length;
-        tempText -= SoundManager.Instance.MusicSource.time + 5f;
+        tempText -= SoundManager.Instance.MusicSource.time + 2f;
 
         string newText = string.Format("{0}", (int)tempText) + "." + string.Format("{0}{1}", ((int)(tempText * 10)) % 10,
                                                                                              ((int)(tempText * 100)) % 10);
         _fLevelDuration = tempText;
 
-        LevelDuration.text = newText;
+        LevelDuration.text = "TIME BEFORE COMMUNISM - " + newText;
     }
 
     private void Update()
@@ -47,7 +47,7 @@ public class LevelManager : MonoBehaviour
                                                                                              ((int)(tempText * 100)) % 10);
         _fLevelDuration = tempText;
 
-        LevelDuration.text = newText;
+        LevelDuration.text = "TIME BEFORE COMMUNISM - " + newText;
     }
 
 }
